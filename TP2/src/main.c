@@ -303,8 +303,7 @@ void search_cycle_chaine(Graphe *g){
         } else {
             printf("Composante connexe %d : Pas de chaine ni cycle\n",i+1);
         }
-    }
-    
+    } 
 }
 
 int main()
