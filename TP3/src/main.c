@@ -41,22 +41,20 @@ Graphe *load_graphe(char *file_name){
     sprintf(path, "../%s.txt", file_name);
     FILE *file = fopen(path, "r");
 
-    int ordre,taille;
+    int ordre,taille,poids;
+    char src,dest,id_sommet;
     
     fscanf(file,"%d",&ordre);
     Graphe *g = init_graphe(ordre);
     g->ordre = ordre;
 
     for (int i = 0; i < ordre; i++) {
-        char id_sommet;
         fscanf(file, " %c", &id_sommet);
     }
     
     fscanf(file,"%d",&taille);
     for (int i = 0; i < taille ; i++)
     {
-        char src,dest;
-        int poids;
         fscanf(file," %c %c %d",&src,&dest,&poids);
         init_arc(g,src,dest,poids);
     }
@@ -143,21 +141,21 @@ void dijkstra(Graphe* g, char src, char dest) {
         printf("Pas de chemin trouvé entre %c et %c.\n", src, dest);
     } else {
         printf("-----------------------------------\n");
-        printf("Distance minimale de %c vers %c : %d\n", src, dest, distances[dest_index]);
 
         char chemin[g->ordre];
         int index = 0;
 
         for (int v=dest_index ; v!=-1 ; v=predecessors[v]==-1 ? -1 : predecessors[v]-'A') {
             if (v < 0 || v >= g->ordre) {
-                printf("Sommet invalide : %d\n", v);
+                printf("Sommet invalide : %c\n", v+'A');
                 break;
             }
             chemin[index++] = v+'A';
         }
 
         if (index == 0) {
-            printf("Pas de chemin valide trouvé.\n");
+            printf("Pas de chemin valide trouve\n");
+            return;
         } else {
             printf("Chemin : ");
             for (int k=index-1; k>-1; k--) {
@@ -165,6 +163,7 @@ void dijkstra(Graphe* g, char src, char dest) {
                 if(k)printf("-> ");
             }
             printf("\n");
+            printf("Distance minimale de %c vers %c : %d\n", src, dest, distances[dest_index]);
             printf("-----------------------------------\n");
         }
     }
