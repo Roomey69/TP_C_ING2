@@ -6,11 +6,90 @@ int main()
     char src,dest;
     printf("Entrez le nom du fichier : "); scanf("%s",file_name);
     Graphe *g = load_graphe(file_name);
-    afficher_graphe(g);
+    //afficher_graphe(g);
     printf("Entrez le sommet de depart : "); scanf(" %c",&src);
     printf("Entrez le sommet d'arrive : "); scanf(" %c",&dest);
+    clock_t start_time = clock();
     dijkstra(g,src,dest);
+    clock_t end_time = clock();
+    double time_spent = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+    printf("Temps d'execution de Dijkstra: %f secondes\n", time_spent);
     free_graphe(g);
+    return 0;
+}
+
+Min_heap* create_Min_heap(int capacity) {
+    Min_heap* heap = (Min_heap*) malloc(sizeof(Min_heap));
+    heap->tab = (Min_heap_node*) malloc(capacity * sizeof(Min_heap_node));
+    heap->pos = (int*) malloc(capacity * sizeof(int));
+    heap->size = 0;
+    heap->capacity = capacity;
+    return heap;
+}
+
+void swap_Min_heap_node(Min_heap_node* a, Min_heap_node* b) {
+    Min_heap_node temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void heapifyDown(Min_heap* heap, int idx) {
+    int smallest = idx;
+    int left = 2 * idx + 1;
+    int right = 2 * idx + 2;
+
+    if (left < heap->size && heap->tab[left].distance < heap->tab[smallest].distance)
+        smallest = left;
+    if (right < heap->size && heap->tab[right].distance < heap->tab[smallest].distance)
+        smallest = right;
+
+    if (smallest != idx) {
+        heap->pos[heap->tab[smallest].sommet] = idx;
+        heap->pos[heap->tab[idx].sommet] = smallest;
+        swap_Min_heap_node(&heap->tab[smallest], &heap->tab[idx]);
+        heapifyDown(heap, smallest);
+    }
+}
+
+void heapifyUp(Min_heap* heap, int idx) {
+    int parent = (idx - 1) / 2;
+
+    if (idx && heap->tab[idx].distance < heap->tab[parent].distance) {
+        heap->pos[heap->tab[idx].sommet] = parent;
+        heap->pos[heap->tab[parent].sommet] = idx;
+        swap_Min_heap_node(&heap->tab[idx], &heap->tab[parent]);
+        heapifyUp(heap, parent);
+    }
+}
+
+void insert_Min_heap(Min_heap* heap, int sommet, int distance) {
+    heap->tab[heap->size].sommet = sommet;
+    heap->tab[heap->size].distance = distance;
+    heap->pos[sommet] = heap->size;
+    heap->size++;
+    heapifyUp(heap, heap->size - 1);
+}
+
+Min_heap_node extractMin(Min_heap* heap) {
+    Min_heap_node root = heap->tab[0];
+    Min_heap_node lastNode = heap->tab[heap->size - 1];
+    heap->tab[0] = lastNode;
+    heap->pos[root.sommet] = heap->size - 1;
+    heap->pos[lastNode.sommet] = 0;
+    heap->size--;
+    heapifyDown(heap, 0);
+    return root;
+}
+
+void decreaseKey(Min_heap* heap, int sommet, int distance) {
+    int i = heap->pos[sommet];
+    heap->tab[i].distance = distance;
+    heapifyUp(heap, i);
+}
+
+int is_In_Min_heap(Min_heap* heap, int sommet) {
+    if (heap->pos[sommet] < heap->size)
+        return 1;
     return 0;
 }
 
@@ -46,7 +125,6 @@ Graphe *load_graphe(char *file_name){
     
     fscanf(file,"%d",&ordre);
     Graphe *g = init_graphe(ordre);
-    g->ordre = ordre;
 
     for (int i = 0; i < ordre; i++) {
         fscanf(file, " %c", &id_sommet);
@@ -78,6 +156,7 @@ void free_graphe(Graphe* g) {
 }
 
 void afficher_graphe(Graphe* g) {
+    printf("\n");
     for (int i = 0; i < g->ordre; i++) {
         char sommet = 'A' + i;
         printf("%c :", sommet);
@@ -88,6 +167,7 @@ void afficher_graphe(Graphe* g) {
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 void dijkstra(Graphe* g, char src, char dest) {
@@ -171,4 +251,67 @@ void dijkstra(Graphe* g, char src, char dest) {
     free(distances);
     free(visited);
     free(predecessors);
+}
+
+void dijkstra_heap(Graphe* g, char src, char dest) {
+    int* distances = (int*)malloc(g->ordre * sizeof(int));
+    int* predecessors = (int*)malloc(g->ordre * sizeof(int));
+    Min_heap* heap = create_Min_heap(g->ordre);
+
+    for (int i = 0; i < g->ordre; i++) {
+        distances[i] = INT_MAX;
+        predecessors[i] = -1;
+        insert_Min_heap(heap, i, INT_MAX);
+    }
+
+    int src_index = src - 'A';
+    distances[src_index] = 0;
+    decreaseKey(heap, src_index, 0);
+
+    while (heap->size) {
+        Min_heap_node minNode = extractMin(heap);
+        int u = minNode.sommet;
+
+        Arc* arc = g->sommets[u].head;
+        while (arc != NULL) {
+            int v = arc->dest - 'A';
+
+            if (is_In_Min_heap(heap, v) && distances[u] != INT_MAX &&
+                distances[u] + arc->poids < distances[v]) {
+                distances[v] = distances[u] + arc->poids;
+                predecessors[v] = u + 'A';
+                decreaseKey(heap, v, distances[v]);
+            }
+
+            arc = arc->next;
+        }
+    }
+
+    int dest_index = dest - 'A';
+    if (distances[dest_index] == INT_MAX) {
+        printf("Pas de chemin trouvé entre %c et %c.\n", src, dest);
+    } else {
+        printf("-----------------------------------\n");
+
+        char chemin[g->ordre];
+        int index = 0;
+
+        for (int v = dest_index; v != -1; v = predecessors[v] == -1 ? -1 : predecessors[v] - 'A') {
+            chemin[index++] = v + 'A';
+        }
+
+        printf("Chemin : ");
+        for (int k = index - 1; k >= 0; k--) {
+            printf("%c ", chemin[k]);
+            if (k) printf("-> ");
+        }
+        printf("\nDistance minimale de %c vers %c : %d\n", src, dest, distances[dest_index]);
+        printf("-----------------------------------\n");
+    }
+
+    free(distances);
+    free(predecessors);
+    free(heap->tab);
+    free(heap->pos);
+    free(heap);
 }
