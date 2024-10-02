@@ -3,6 +3,8 @@
 #include <limits.h>
 #include <time.h>
 
+enum{ MENU, GRAPHE ,DIJKSTRA, DIJKSTRA_HEAP, LEAVE};
+
 typedef struct Arc{
     char dest;
     int poids;

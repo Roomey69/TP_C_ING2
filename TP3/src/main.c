@@ -4,15 +4,41 @@ int main()
 {
     char file_name[50];
     char src,dest;
+    int menu = MENU;
 
-    printf("Entrez le nom du fichier : "); scanf("%s",file_name);
-    Graphe *g = load_graphe(file_name);
+    Graphe *g = NULL;
 
-    //afficher_graphe(g);
-    
-    printf("Entrez le sommet de depart : "); scanf(" %c",&src);
-    printf("Entrez le sommet d'arrive : "); scanf(" %c",&dest);
-    dijkstra(g,src,dest);
+    while(menu != LEAVE){
+        switch (menu)
+        {
+        case MENU:
+            file_name[0] = '\0';
+            printf("Entrez le nom du fichier : "); scanf("%s",file_name);
+            g = load_graphe(file_name);
+            printf("1 AFFICHER LE GRAPHE\n2 DIJKSTRA\n3 DIJKSTRA TAS / FILE DE PRIORITE\n4 QUITTER\n");
+            scanf("%d",&menu);
+            break;
+        case GRAPHE:
+            afficher_graphe(g);
+            menu = MENU;
+            break;    
+        case DIJKSTRA:
+            printf("Entrez le sommet de depart : "); scanf(" %c",&src);
+            printf("Entrez le sommet d'arrive : "); scanf(" %c",&dest);
+            dijkstra(g,src,dest);
+            menu = MENU;
+            break;
+        case DIJKSTRA_HEAP:
+            printf("Entrez le sommet de depart : "); scanf(" %c",&src);
+            printf("Entrez le sommet d'arrive : "); scanf(" %c",&dest);
+            dijkstra_heap(g,src,dest);
+            menu = MENU;
+            break;
+        default:
+            printf("Option invalide. Veuillez réessayer.\n");
+            break;
+        }
+    }
 
     free_graphe(g);
     return 0;
@@ -187,7 +213,7 @@ void dijkstra(Graphe* g, char src, char dest) {
     for (int i=0 ; i < g->ordre-1 ; i++) {
 
         int min_dist = INT_MAX;
-        int min_index = -1;
+        int min_index = -1; 
 
         for (int j=0 ; j<g->ordre ; j++) {
             if (!visited[j] && distances[j] < min_dist) {
