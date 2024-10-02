@@ -4,16 +4,16 @@ int main()
 {
     char file_name[50];
     char src,dest;
+
     printf("Entrez le nom du fichier : "); scanf("%s",file_name);
     Graphe *g = load_graphe(file_name);
+
     //afficher_graphe(g);
+    
     printf("Entrez le sommet de depart : "); scanf(" %c",&src);
     printf("Entrez le sommet d'arrive : "); scanf(" %c",&dest);
-    clock_t start_time = clock();
     dijkstra(g,src,dest);
-    clock_t end_time = clock();
-    double time_spent = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    printf("Temps d'execution de Dijkstra: %f secondes\n", time_spent);
+
     free_graphe(g);
     return 0;
 }
