@@ -14,6 +14,8 @@ typedef struct Arc{
 
 typedef struct {
     Arc* head;
+    int x;
+    int y;
 } Sommet;
 
 typedef struct {
