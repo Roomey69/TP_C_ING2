@@ -424,8 +424,7 @@ void astar(Graphe* g, char start, char goal, int (*heuristique)(int, int, int, i
     int start_index = start - 'A';
     int goal_index = goal - 'A';
     dist[start_index] = 0;
-    fScore[start_index] = heuristique(g->sommets[start_index].x, g->sommets[start_index].y,
-                                       g->sommets[goal_index].x, g->sommets[goal_index].y);
+    fScore[start_index] = heuristique(g->sommets[start_index].x, g->sommets[start_index].y, g->sommets[goal_index].x, g->sommets[goal_index].y);
     
     Min_heap* heap = create_Min_heap(ordre);
     insert_Min_heap(heap, start_index, fScore[start_index]);
@@ -457,10 +456,7 @@ void astar(Graphe* g, char start, char goal, int (*heuristique)(int, int, int, i
 
                 if (tentative_gScore < dist[neighbor_index]) {
                     dist[neighbor_index] = tentative_gScore;
-                    fScore[neighbor_index] = tentative_gScore + heuristique(g->sommets[neighbor_index].x, 
-                                                                            g->sommets[neighbor_index].y, 
-                                                                            g->sommets[goal_index].x, 
-                                                                            g->sommets[goal_index].y);
+                    fScore[neighbor_index] = tentative_gScore + heuristique(g->sommets[neighbor_index].x, g->sommets[neighbor_index].y, g->sommets[goal_index].x, g->sommets[goal_index].y);
                     parent[neighbor_index] = current_index;
 
                     if (!is_In_Min_heap(heap, neighbor_index)) {
@@ -498,7 +494,7 @@ void astar_no_heap(Graphe* g, char start, char goal, int (*heuristique)(int, int
     int start_index = start - 'A';
     int goal_index = goal - 'A';
     dist[start_index] = 0;
-    fScore[start_index] = heuristique(start_index, start_index, goal_index, goal_index);
+    fScore[start_index] = heuristique(g->sommets[start_index].x, g->sommets[start_index].y, g->sommets[goal_index].x, g->sommets[goal_index].y);
 
     while (1) {
         int current_index = -1;
@@ -539,7 +535,7 @@ void astar_no_heap(Graphe* g, char start, char goal, int (*heuristique)(int, int
 
                 if (tentative_gScore < dist[neighbor_index]) {
                     dist[neighbor_index] = tentative_gScore;
-                    fScore[neighbor_index] = tentative_gScore + heuristique(current_index, current_index, goal_index, goal_index);
+                    fScore[neighbor_index] = tentative_gScore + heuristique(g->sommets[neighbor_index].x, g->sommets[neighbor_index].y, g->sommets[goal_index].x, g->sommets[goal_index].y);
                     parent[neighbor_index] = current_index;
                 }
             }
