@@ -15,32 +15,25 @@ int main()
             file_name[0] = '\0';
             printf("Entrez le nom du fichier : "); scanf("%s",file_name);
             g = load_graphe(file_name);
-            printf("1 - Afficher le graphe\n2 - Dijkstra\n3 - Dijkstra heap\n4 - Astar\n5 - Astar heap\n6 - Quitter\n");
+            printf("-------------------------------------------\n");
+            printf("1 - Afficher le graphe\n2 - Dijkstra Astar\n3 - Dijkstra Astar Heap\n4 - Quitter\n");
+            printf("-------------------------------------------\n");
             scanf("%d",&menu);
             break;
         case GRAPHE:
             afficher_graphe(g);
             menu = MENU;
             break;    
-        case DIJKSTRA:
+        case DIJKSTRA_ASTAR:
+            printf("-------------------------------------------\n");
             printf("Entrez le sommet de depart : "); scanf(" %c",&src);
             printf("Entrez le sommet d'arrive : "); scanf(" %c",&dest);
-            dijkstra(g,src,dest);
-            menu = MENU;
-            break;
-        case DIJKSTRA_HEAP:
-            printf("Entrez le sommet de depart : "); scanf(" %c",&src);
-            printf("Entrez le sommet d'arrive : "); scanf(" %c",&dest);
-            dijkstra_heap(g,src,dest);
-            menu = MENU;
-            break;
-        case ASTAR:
-            printf("Entrez le sommet de depart : "); scanf(" %c",&src);
-            printf("Entrez le sommet d'arrive : "); scanf(" %c",&dest);
+            printf("-------------------------------------------\n");
             printf("Choisissez la fonction heuristique :\n1 - Tchebychev\n2 - Euclidienne\n3 - Manhattan\n");
+            printf("-------------------------------------------\n");
             int choix_heuristique;
             scanf("%d", &choix_heuristique);
-            
+            dijkstra(g,src,dest);
             if (choix_heuristique == 1) {
                 astar_no_heap(g, src, dest, heuristique_tchebychev);
             } else if (choix_heuristique == 2) {
@@ -50,17 +43,18 @@ int main()
             } else {
                 printf("Option invalide.\n");
             }
-            
             menu = MENU;
             break;
-
-        case ASTAR_HEAP:
+        case DIJKSTRA_ASTAR_HEAP:
+            printf("-------------------------------------------\n");
             printf("Entrez le sommet de depart : "); scanf(" %c",&src);
             printf("Entrez le sommet d'arrive : "); scanf(" %c",&dest);
+            printf("-------------------------------------------\n");
             printf("Choisissez la fonction heuristique :\n1 - Tchebychev\n2 - Euclidienne\n3 - Manhattan\n");
+            printf("-------------------------------------------\n");
             int choix_heuristique2;
             scanf("%d", &choix_heuristique2);
-            
+            dijkstra_heap(g,src,dest);
             if (choix_heuristique2 == 1) {
                 astar(g, src, dest, heuristique_tchebychev);
             } else if (choix_heuristique2 == 2) {
@@ -70,7 +64,6 @@ int main()
             } else {
                 printf("Option invalide.\n");
             }
-            
             menu = MENU;
             break;
         default:
@@ -244,6 +237,7 @@ void dijkstra(Graphe* g, char src, char dest) {
     int* distances = (int*)malloc(g->ordre * sizeof(int));
     int* visited = (int*)malloc(g->ordre * sizeof(int));
     char* predecessors = (char*)malloc(g->ordre * sizeof(char));
+    int n=1;
 
     for (int i=0 ; i<g->ordre ; i++) {
         distances[i] = INT_MAX;
@@ -271,6 +265,7 @@ void dijkstra(Graphe* g, char src, char dest) {
         }
 
         visited[min_index] = 1;
+        n++;
 
         Arc* arc = g->sommets[min_index].head;
         while (arc != NULL) {
@@ -290,7 +285,7 @@ void dijkstra(Graphe* g, char src, char dest) {
     if (distances[dest_index] == INT_MAX) {
         printf("Pas de chemin trouvé entre %c et %c.\n", src, dest);
     } else {
-        printf("-----------------------------------\n");
+        printf("-------------------------------------------\n");
 
         char chemin[g->ordre];
         int index = 0;
@@ -307,14 +302,15 @@ void dijkstra(Graphe* g, char src, char dest) {
             printf("Pas de chemin valide trouve\n");
             return;
         } else {
-            printf("Chemin : ");
+            printf("Chemin Dijkstra : ");
             for (int k=index-1; k>-1; k--) {
                 printf("%c ", chemin[k]);
                 if(k)printf("-> ");
             }
             printf("\n");
-            printf("Distance minimale de %c vers %c : %d\n", src, dest, distances[dest_index]);
-            printf("-----------------------------------\n");
+            printf("Poids total du chemin : %d\n", distances[dest_index]);
+            printf("Nombres de sommets decouvert : %d\n",n);
+            printf("-------------------------------------------\n");
         }
     }
 
@@ -327,6 +323,7 @@ void dijkstra_heap(Graphe* g, char src, char dest) {
     int* distances = (int*)malloc(g->ordre * sizeof(int));
     int* predecessors = (int*)malloc(g->ordre * sizeof(int));
     Min_heap* heap = create_Min_heap(g->ordre);
+    int n=0;
 
     for (int i = 0; i < g->ordre; i++) {
         distances[i] = INT_MAX;
@@ -341,6 +338,7 @@ void dijkstra_heap(Graphe* g, char src, char dest) {
     while (heap->size) {
         Min_heap_node minNode = extractMin(heap);
         int u = minNode.sommet;
+        n++;
 
         Arc* arc = g->sommets[u].head;
         while (arc != NULL) {
@@ -361,7 +359,7 @@ void dijkstra_heap(Graphe* g, char src, char dest) {
     if (distances[dest_index] == INT_MAX) {
         printf("Pas de chemin trouvé entre %c et %c.\n", src, dest);
     } else {
-        printf("-----------------------------------\n");
+        printf("-------------------------------------------\n");
 
         char chemin[g->ordre];
         int index = 0;
@@ -370,13 +368,14 @@ void dijkstra_heap(Graphe* g, char src, char dest) {
             chemin[index++] = v + 'A';
         }
 
-        printf("Chemin : ");
+        printf("Chemin Dijkstra Heap : ");
         for (int k = index - 1; k >= 0; k--) {
             printf("%c ", chemin[k]);
             if (k) printf("-> ");
         }
-        printf("\nDistance minimale de %c vers %c : %d\n", src, dest, distances[dest_index]);
-        printf("-----------------------------------\n");
+        printf("\nPoids total du chemin : %d\n", distances[dest_index]);
+        printf("Nombres de sommets decouvert : %d\n",n);
+        printf("-------------------------------------------\n");
     }
 
     free(distances);
@@ -407,76 +406,92 @@ void afficher_chemin_astar(int* parent, int current_index) {
     printf("-> %c ", current_index + 'A');
 }
 
-void astar(Graphe* g, char start, char goal, int (*heuristique)(int, int, int, int)) {
-    int ordre = g->ordre;
-    int *dist = (int*) malloc(ordre * sizeof(int));
-    int *fScore = (int*) malloc(ordre * sizeof(int));
-    int *visited = (int*) calloc(ordre, sizeof(int));
-    int *parent = (int*) malloc(ordre * sizeof(int));
-    
-    for (int i = 0; i < ordre; i++) {
-        dist[i] = INT_MAX;
-        fScore[i] = INT_MAX;
-        visited[i] = 0;
-        parent[i] = -1;
+void astar(Graphe* g, char src, char dest, int (*heuristique)(int, int, int, int)) {
+    int* distances = (int*)malloc(g->ordre * sizeof(int));
+    int* f_score = (int*)malloc(g->ordre * sizeof(int));
+    int* predecessors = (int*)malloc(g->ordre * sizeof(int));  // Stocke les indices comme entiers
+    int* visited = (int*)calloc(g->ordre, sizeof(int));  // Tableau pour marquer les sommets visités
+    Min_heap* heap = create_Min_heap(g->ordre);
+    int n=0;
+
+    for (int i = 0; i < g->ordre; i++) {
+        distances[i] = INT_MAX;
+        f_score[i] = INT_MAX;
+        predecessors[i] = -1;
+        insert_Min_heap(heap, i, INT_MAX);
     }
-    
-    int start_index = start - 'A';
-    int goal_index = goal - 'A';
-    dist[start_index] = 0;
-    fScore[start_index] = heuristique(g->sommets[start_index].x, g->sommets[start_index].y, g->sommets[goal_index].x, g->sommets[goal_index].y);
-    
-    Min_heap* heap = create_Min_heap(ordre);
-    insert_Min_heap(heap, start_index, fScore[start_index]);
+
+    int src_index = src - 'A';
+    int dest_index = dest - 'A';
+    distances[src_index] = 0;
+    f_score[src_index] = heuristique(g->sommets[src_index].x, g->sommets[src_index].y, g->sommets[dest_index].x, g->sommets[dest_index].y);
+    decreaseKey(heap, src_index, f_score[src_index]);
 
     while (heap->size > 0) {
-        Min_heap_node current = extractMin(heap);
-        int current_index = current.sommet;
 
-        if (current_index == goal_index) {
-            printf("-----------------------------------\n");
-            printf("Chemin trouvé !\n");
-            afficher_chemin_astar(parent, goal_index);
-            printf("\nPoids total du chemin : %d\n", dist[goal_index]);
-            printf("-----------------------------------\n");
-            free(dist);
-            free(fScore);
+        Min_heap_node current_node = extractMin(heap);
+        int current_index = current_node.sommet;
+
+        if (visited[current_index]) continue;
+
+        visited[current_index] = 1;
+        n++;
+
+        if (current_index == dest_index) {
+            printf("-------------------------------------------\n");
+            printf("Chemin Astar Heap : ");
+            afficher_chemin_astar(predecessors, dest_index);
+            printf("\nDistance totale : %d\n", distances[dest_index]);
+            printf("Nombres de sommets decouvert : %d\n",n);
+            printf("-------------------------------------------\n");
+            free(distances);
+            free(f_score);
+            free(predecessors);
             free(visited);
-            free(parent);
+            free(heap->tab);
+            free(heap->pos);
+            free(heap);
             return;
         }
 
-        visited[current_index] = 1;
+        Arc* arc = g->sommets[current_index].head;
+        while (arc != NULL) {
+            int neighbor_index = arc->dest - 'A';
 
-        Arc* adj = g->sommets[current_index].head;
-        while (adj != NULL) {
-            int neighbor_index = adj->dest - 'A';
-            if (!visited[neighbor_index]) {
-                int tentative_gScore = dist[current_index] + adj->poids;
+            if (visited[neighbor_index]) {
+                arc = arc->next;
+                continue;
+            }
 
-                if (tentative_gScore < dist[neighbor_index]) {
-                    dist[neighbor_index] = tentative_gScore;
-                    fScore[neighbor_index] = tentative_gScore + heuristique(g->sommets[neighbor_index].x, g->sommets[neighbor_index].y, g->sommets[goal_index].x, g->sommets[goal_index].y);
-                    parent[neighbor_index] = current_index;
+            if (distances[neighbor_index] == INT_MAX) {
+                n++;
+            }
 
-                    if (!is_In_Min_heap(heap, neighbor_index)) {
-                        insert_Min_heap(heap, neighbor_index, fScore[neighbor_index]);
-                    } else {
-                        decreaseKey(heap, neighbor_index, fScore[neighbor_index]);
-                    }
+            int tentative_g_score = distances[current_index] + arc->poids;
+
+            if (tentative_g_score < distances[neighbor_index]) {
+                distances[neighbor_index] = tentative_g_score;
+                f_score[neighbor_index] = tentative_g_score + heuristique(g->sommets[neighbor_index].x, g->sommets[neighbor_index].y, g->sommets[dest_index].x, g->sommets[dest_index].y);
+                predecessors[neighbor_index] = current_index;
+
+                if (is_In_Min_heap(heap, neighbor_index)) {
+                    decreaseKey(heap, neighbor_index, f_score[neighbor_index]);
                 }
             }
-            adj = adj->next;
+
+            arc = arc->next;
         }
     }
 
-    printf("Pas de chemin trouvé vers %c.\n", goal);
-    free(dist);
-    free(fScore);
+    printf("Pas de chemin trouve entre %c et %c.\n", src, dest);
+    free(distances);
+    free(f_score);
+    free(predecessors);
     free(visited);
-    free(parent);
+    free(heap->tab);
+    free(heap->pos);
+    free(heap);
 }
-
 
 void astar_no_heap(Graphe* g, char start, char goal, int (*heuristique)(int, int, int, int)) {
     int ordre = g->ordre;
@@ -484,6 +499,7 @@ void astar_no_heap(Graphe* g, char start, char goal, int (*heuristique)(int, int
     int *fScore = (int*) malloc(ordre * sizeof(int));
     int *visited = (int*) calloc(ordre, sizeof(int));
     int *parent = (int*) malloc(ordre * sizeof(int));
+    int n=1;
 
     for (int i = 0; i < ordre; i++) {
         dist[i] = INT_MAX;
@@ -513,11 +529,12 @@ void astar_no_heap(Graphe* g, char start, char goal, int (*heuristique)(int, int
         }
 
         if (current_index == goal_index) {
-            printf("-----------------------------------\n");
-            printf("Chemin trouve !\n");
+            printf("-------------------------------------------\n");
+            printf("Chemin Astar :");
             afficher_chemin_astar(parent, goal_index);
             printf("\nPoids total du chemin : %d\n", dist[goal_index]);
-            printf("-----------------------------------\n");
+            printf("Nombre de sommets decouvert : %d\n",n);
+            printf("-------------------------------------------\n");
             free(dist);
             free(fScore);
             free(visited);
@@ -526,13 +543,16 @@ void astar_no_heap(Graphe* g, char start, char goal, int (*heuristique)(int, int
         }
 
         visited[current_index] = 1;
+        n++;
 
         Arc* adj = g->sommets[current_index].head;
         while (adj != NULL) {
             int neighbor_index = adj->dest - 'A';
+            if (dist[neighbor_index] == INT_MAX) {
+                n++;
+            }
             if (!visited[neighbor_index]) {
                 int tentative_gScore = dist[current_index] + adj->poids;
-
                 if (tentative_gScore < dist[neighbor_index]) {
                     dist[neighbor_index] = tentative_gScore;
                     fScore[neighbor_index] = tentative_gScore + heuristique(g->sommets[neighbor_index].x, g->sommets[neighbor_index].y, g->sommets[goal_index].x, g->sommets[goal_index].y);

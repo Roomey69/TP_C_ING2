@@ -4,7 +4,7 @@
 #include <time.h>
 #include <math.h>
 
-enum{ MENU, GRAPHE ,DIJKSTRA, DIJKSTRA_HEAP, ASTAR, ASTAR_HEAP, LEAVE};
+enum{ MENU, GRAPHE ,DIJKSTRA_ASTAR ,DIJKSTRA_ASTAR_HEAP, LEAVE};
 
 typedef struct Arc{
     char dest;
